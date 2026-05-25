@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const FLAGS = {
   1: 'FLAG{sess1on_h1jack3d_xss_2024}',
