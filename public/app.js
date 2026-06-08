@@ -525,12 +525,16 @@ function simCh1() {
   const val = document.getElementById('ch1-input').value;
   const out = document.getElementById('ch1-out');
   if (val.includes('document.cookie')) {
-    out.innerHTML = `
-      <div class="terminal">
-        <span class="output">GET /?c=ADMIN_SESSION_TOKEN HTTP/1.1</span><br>
-        <button class="int-btn-primary" style="margin-left:0; margin-top:8px;" onclick="simCh1Admin()">[ Set Cookie & Claim Flag ]</button>
-      </div>
-    `;
+    out.innerHTML = `<div class="terminal">Comment posted: ${val}</div>`;
+    setTimeout(() => {
+      out.innerHTML += `
+        <div class="terminal" style="margin-top:8px;">
+          <span class="prompt">[System] Admin visited page...</span><br>
+          <span class="output">GET /?c=ADMIN_SESSION_TOKEN HTTP/1.1</span><br>
+          <button class="int-btn-primary" style="margin-left:0; margin-top:8px;" onclick="simCh1Admin()">[ Set Cookie & Claim Flag ]</button>
+        </div>
+      `;
+    }, 1500);
   } else {
     out.innerHTML = `<div class="terminal">Comment posted: ${val}</div>`;
   }
@@ -629,7 +633,7 @@ function simCh5Attack() {
 }
 
 async function simCh6Token() {
-  const res = await fetch('/api/ch6/token');
+  const res = await fetch('/api/ch6/token', { method: 'POST' });
   const data = await res.json();
   document.getElementById('ch6-input').value = data.token;
 }

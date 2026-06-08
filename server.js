@@ -44,9 +44,10 @@ app.get('/api/challenges', (req, res) => {
 });
 
 app.post('/api/submit', (req, res) => {
-  const { challengeId, flag } = req.body;
-  const correct = FLAGS[challengeId] === flag;
-  res.json({ correct });
+  const submitted = (req.body.flag || '').trim();
+  const correct = FLAGS[req.body.challengeId].trim();
+  const isCorrect = submitted === correct;
+  res.json({ correct: isCorrect });
 });
 
 app.post('/api/ch7/oracle', (req, res) => {
@@ -63,16 +64,24 @@ app.post('/api/ch7/oracle', (req, res) => {
 app.post('/api/ch8/waf', (req, res) => {
   const { payload } = req.body;
   if (!payload) return res.json({ result: 'benign' });
-  const upper = payload.toUpperCase();
-  const clean = payload.replace(/[\\x00\\s]/g, '').toUpperCase();
-  const hasSelect = upper.includes('SELECT');
-  const isMutated = clean !== upper.replace(/\\s/g, '');
-  if (hasSelect && isMutated) {
-    res.json({ result: 'benign', flag: FLAGS[8] });
-  } else if (hasSelect) {
-    res.json({ result: 'malicious' });
+  const upperPayload = payload.toUpperCase();
+  const cleanPayload = payload.replace(/[\\x00\\s]/g, '').toUpperCase();
+  
+  // ML model classifies first (hardcoded logic)
+  let prediction = 0; // benign
+  if (cleanPayload.includes('SELECT')) {
+    if (!payload.includes('\\x00')) {
+      prediction = 1; // malicious
+    }
+  }
+
+  // Flag only if model says benign AND raw payload contains SELECT
+  if (prediction === 0 && upperPayload.includes('SELECT')) {
+    return res.json({ result: 'benign', flag: FLAGS[8] });
+  } else if (prediction === 1) {
+    return res.json({ result: 'malicious' });
   } else {
-    res.json({ result: 'benign' });
+    return res.json({ result: 'benign' });
   }
 });
 
