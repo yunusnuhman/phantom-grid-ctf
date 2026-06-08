@@ -381,37 +381,33 @@ function requestHint(id) {
 }
 
 async function submitFlag(challengeId, flagValue) {
-  // Trim whitespace from all sides
   flagValue = flagValue.trim();
-  
-  // Check if it matches FLAG{...} format
-  if (!flagValue.match(/^FLAG\\{.+\\}$/i)) {
-    showFlagError('✗ INVALID FORMAT — must be FLAG{something}');
-    console.log('Flag rejected:', flagValue);
+
+  const match = flagValue.match(/FLAG\\{[^}]+\\}/);
+  if (!match) {
+    showFlagError('X INVALID FORMAT - must be FLAG{something}');
     return;
   }
+
+  const cleanFlag = match[0];
 
   try {
     const res = await fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ challengeId: parseInt(challengeId), flag: flagValue })
+      body: JSON.stringify({ challengeId: parseInt(challengeId), flag: cleanFlag })
     });
-    
     const data = await res.json();
-    
     if (data.correct) {
       solved.add(parseInt(challengeId));
       localStorage.setItem('pg_solved', JSON.stringify([...solved]));
       updateScoreCounter();
-      showFlagSuccess('◈ CHECKPOINT CLEARED — FLAG ACCEPTED ◈');
+      showFlagSuccess('CHECKPOINT CLEARED - FLAG ACCEPTED');
     } else {
-      showFlagError('✗ INCORRECT FLAG — KEEP TRYING, AGENT');
-      console.log('Server said incorrect. Submitted:', flagValue);
+      showFlagError('X INCORRECT FLAG - KEEP TRYING, AGENT');
     }
   } catch (error) {
-    console.error('Flag submission error:', error);
-    showFlagError('✗ ERROR SUBMITTING FLAG');
+    showFlagError('X ERROR SUBMITTING FLAG');
   }
 }
 

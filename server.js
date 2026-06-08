@@ -45,8 +45,8 @@ app.get('/api/challenges', (req, res) => {
 
 app.post('/api/submit', (req, res) => {
   const submitted = (req.body.flag || '').trim();
-  const correct = FLAGS[req.body.challengeId].trim();
-  const isCorrect = submitted === correct;
+  const correct = FLAGS[parseInt(req.body.challengeId)];
+  const isCorrect = correct && submitted === correct;
   res.json({ correct: isCorrect });
 });
 
