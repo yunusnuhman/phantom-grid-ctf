@@ -381,16 +381,13 @@ function requestHint(id) {
 }
 
 async function submitFlag(challengeId, flagValue) {
-  flagValue = flagValue.trim();
-
-  const match = flagValue.match(/FLAG\\{[^}]+\\}/);
-  if (!match) {
+  flagValue = (flagValue || '').trim();
+  const extracted = flagValue.match(/FLAG\\{[^}]+\\}/);
+  const cleanFlag = extracted ? extracted[0] : flagValue;
+  if (!cleanFlag.startsWith('FLAG{')) {
     showFlagError('X INVALID FORMAT - must be FLAG{something}');
     return;
   }
-
-  const cleanFlag = match[0];
-
   try {
     const res = await fetch('/api/submit', {
       method: 'POST',
@@ -406,8 +403,8 @@ async function submitFlag(challengeId, flagValue) {
     } else {
       showFlagError('X INCORRECT FLAG - KEEP TRYING, AGENT');
     }
-  } catch (error) {
-    showFlagError('X ERROR SUBMITTING FLAG');
+  } catch (err) {
+    showFlagError('X ERROR - TRY AGAIN');
   }
 }
 
